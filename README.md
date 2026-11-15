@@ -40,11 +40,11 @@ python scripts/03_forecast_tomorrow.py --date 2025-10-19   # demo: the alert for
 
 ## Part B: Mayor for a Year
 
-A browser game in which the player, as mayor of a small Indian town, must decide which of several
-correlated factors actually causes a problem. Four levels teach confounding, reverse causation,
+A browser game in which the player, as mayor of a small Indian town, walks around the town in 3D and
+must decide which of several correlated factors actually causes a problem. Four levels teach confounding, reverse causation,
 Simpson's paradox and randomised experiments; a hidden structural causal model generates fresh data
 every game.
 
 * **Play online:** <https://rohancarthik-max.github.io/cs3006-project/part-b-mayor-game/>
-  (also available at <https://rohancarthik-max.github.io/mayor-game/>)
+  (a lighter 2D version is at [`classic.html`](https://rohancarthik-max.github.io/cs3006-project/part-b-mayor-game/classic.html))
 * **Play offline:** open `part-b-mayor-game/index.html` in a browser. No installation needed.

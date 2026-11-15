@@ -6,6 +6,7 @@
   'use strict';
   var C = M.scm.common, S = M.stats, CH = M.charts, fmt = CH.fmt;
   var app, state = {};
+  var hooks = {}; // set by game3d.js: onRender, onLevel, afterBrief, afterExplore, playSeason
 
   var OBJECTIVES = [
     'Explain why a strong correlation does not show causation.',
@@ -37,6 +38,7 @@
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function render(html) {
     stopTimers(); CH.hideTip();
+    if (hooks.onRender) hooks.onRender();
     app.innerHTML = html; window.scrollTo(0, 0);
     app.classList.remove('enter'); void app.offsetWidth; app.classList.add('enter');
   }
@@ -204,6 +206,7 @@
     state.lastTab = null; state.map = null; state.townT = null; state.exploreStart = null;
     state.lag = null; state.sp = null; state.u = null;
     M.log.event('level_start', { level: lv.id, tries: state.world.tries });
+    if (hooks.onLevel) hooks.onLevel(lv, state.world);
     briefScreen();
   }
 
@@ -233,7 +236,8 @@
           '<p>Every tool from the earlier levels is open.</p>') + '</section>' +
       '<div class="actions"><button class="btn primary" id="go">Open the data dashboard →</button></div>'
     );
-    q('#go').addEventListener('click', exploreScreen);
+    if (hooks.afterBrief) { q('#go').textContent = 'Head out into Navapuram →'; q('#go').addEventListener('click', function () { hooks.afterBrief(); }); }
+    else q('#go').addEventListener('click', exploreScreen);
     if (!isPanel()) { classView(q('#classview'), w.history, { key: 'A', compact: true }); return; }
     var spec = townSpecFor(), h = w.history;
     spec.budget = lv.shared ? termLeft() : lv.model.budget;
@@ -267,7 +271,8 @@
       '<div class="actions sticky"><button class="btn primary" id="to-desk">I\'ve decided. Go to the policy desk →</button></div>'
     );
     qa('.tab').forEach(function (b) { b.addEventListener('click', function () { showTool(b.getAttribute('data-tab')); }); });
-    q('#to-desk').addEventListener('click', deskScreen);
+    if (hooks.afterExplore) { q('#to-desk').textContent = 'Done here. Back into town →'; q('#to-desk').addEventListener('click', function () { hooks.afterExplore(); }); }
+    else q('#to-desk').addEventListener('click', deskScreen);
     showTool(state.lastTab || lv.tools[0]);
   }
   function showTool(tab) {
@@ -687,6 +692,14 @@
       '<span class="ci-dot" style="left:' + sc(p.diff) + '%"></span><span class="ci-l">−80%</span><span class="ci-0" style="left:' + sc(0) + '%">0</span><span class="ci-r">+80%</span></div></div>';
   }
 
+  function pilotResultScreen(pilot) {
+    topbar();
+    render('<section class="card"><p class="eyebrow">' + levelLabel(L()) + ': randomised pilot</p><h1>Pilot result</h1>' + pilotSummaryHTML(pilot) +
+      '<p class="small muted">Each ward is compared with its own usual level from last year, then T wards are compared with C wards. The 95% CI is the range of effects that fit the data; if it doesn\'t include 0, luck alone is an unlikely explanation.</p>' +
+      '<div class="actions"><button class="btn primary" id="todesk">Back to the policy desk →</button></div></section>');
+    q('#todesk').addEventListener('click', deskScreen);
+  }
+
   /* Pilot: coins decide the treated wards (seeded, so replayable); the pilot runs on the real
    * simulated season for 4 weeks; we compare treated vs control wards with a Welch 95% CI. */
   function pilotScreen(policyId) {
@@ -702,6 +715,10 @@
     state.weeksUsed += lv.pilot.weeks;
     state.flags.pilot = true;
     M.log.event('pilot', { level: lv.id, policy: policyId, diff: +a.diff.toFixed(3), lo: +a.lo.toFixed(3), hi: +a.hi.toFixed(3) });
+    if (hooks.pilotPlay) { // the 3D town tosses the coins and runs the pilot weeks itself
+      hooks.pilotPlay({ mask: mask, run: run, phase: phase, policy: policyId, label: pol.label, weeks: lv.pilot.weeks }, function () { pilotResultScreen(pilot); });
+      return;
+    }
     topbar();
     render(
       '<section class="card"><p class="eyebrow">' + levelLabel(lv) + ': randomised pilot</p><h1>Testing: ' + esc(pol.label) + '</h1>' +
@@ -775,7 +792,8 @@
       true_impact: +sc.impact.toFixed(1), best_impact: +sc.best.toFixed(1), best_policy: sc.bestId,
       picked_true_cause: res.pickedCause ? 1 : 0, fell_for_trap: res.fellForTrap ? 1 : 0, score: sc.total,
       explore_seconds: res.exploreSeconds, tools_used: Object.keys(state.toolsUsed).join('|'), used_key_tool: det ? 1 : 0, badges: earned.join('|') });
-    if (isPanel()) simScreen(res); else examScreen(res);
+    if (isPanel() && hooks.playSeason) hooks.playSeason(res, function () { outcomeScreen(res); });
+    else if (isPanel()) simScreen(res); else examScreen(res);
   }
 
   function simScreen(res) {
@@ -845,6 +863,9 @@
     later(function () { showOutcome(res); }, M.fx.reduced ? 0 : 1400);
   }
 
+  // Outcome on its own (used when the 3D town has just played the season)
+  function outcomeScreen(res) { topbar(); render('<section class="card hidden" id="outcome"></section>'); showOutcome(res); }
+
   function showOutcome(res) {
     var lv = L(), sc = res.score, box = q('#outcome'), words = lv.words;
     res.shown = true;
@@ -873,6 +894,7 @@
       '<div class="actions"><button class="btn primary" id="reveal">Reveal the hidden causes →</button></div>';
     topbar();
     M.fx.countUp(q('#n-score'), sc.total, 1200);
+    if (hooks.onResult) hooks.onResult(res);
     requestAnimationFrame(function () { requestAnimationFrame(function () { var m = q('#meter'); if (m) m.style.width = (wellPct * 100) + '%'; }); });
     if (res.pickedCause) later(M.fx.confetti, 500);
     q('#reveal').addEventListener('click', function () { revealScreen(res); });
@@ -953,7 +975,7 @@
     var pre = state.quiz && state.quiz.pre, post = state.quiz && state.quiz.post;
     var l1 = rs.filter(function (r) { return r.id === '1'; })[0], l5 = rs.filter(function (r) { return r.n === 5; });
     render(
-      levelPath() +
+      levelPath() + (hooks.reportExtra ? hooks.reportExtra() : '') +
       '<section class="card"><p class="eyebrow">End of term</p><h1>Report card</h1>' +
         '<div class="stats"><div class="stat"><span class="stat-num" id="n-total">0</span><span class="stat-lbl">total score (of ' + rs.length * 100 + ')</span></div>' +
         '<div class="stat"><span class="stat-num">' + totalStars + ' ★</span><span class="stat-lbl">stars (of ' + rs.length * 3 + ')</span></div>' +
@@ -984,5 +1006,7 @@
     startScreen();
   }
 
-  M.ui = { init: init, _state: function () { return state; }, _goto: function (i) { loadLevel(i); } };
+  M.ui = { init: init, _state: function () { return state; }, _goto: function (i) { loadLevel(i); },
+    hooks: hooks, brief: function () { briefScreen(); }, explore: function () { exploreScreen(); }, desk: function () { deskScreen(); },
+    townSpec: function () { return townSpecFor(); }, start: function () { startScreen(); } };
 })(globalThis.Mayor = globalThis.Mayor || {});

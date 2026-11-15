@@ -1,14 +1,16 @@
 # Mayor for a Year
 
 **A browser game that teaches _correlation does not imply causation_.**
-You are the new mayor of Navapuram, a small Indian town. Each level gives you a problem, a budget and
-a dashboard of town data. The data always points somewhere. Your job is to work out whether it points at the **cause**.
+You are the new mayor of Navapuram, a small Indian town. Walk around the town in 3D, inspect its wards, read
+the newspaper and dig into the data office's records. Each level gives you a problem, a budget and a dashboard
+of town data. The data always points somewhere. Your job is to work out whether it points at the **cause**.
 
-**▶ Play it here: <https://rohancarthik-max.github.io/mayor-game/>** (works on a laptop or phone, no install).
+**▶ Play it here: <https://rohancarthik-max.github.io/cs3006-project/part-b-mayor-game/>** (no install). There is also a lighter
+[classic 2D version](https://rohancarthik-max.github.io/cs3006-project/part-b-mayor-game/classic.html) (`classic.html`), which is the better choice on a phone.
 
 CS3006 Introduction to Data Science, Part B (learning game). **Report:** [`report/CS3006_MayorForAYear_Report.pdf`](report/CS3006_MayorForAYear_Report.pdf).
 
-![The living town: mosquitoes, rain, carts and complaints, all driven by simulated data](docs/screenshots/01_town.jpg)
+![Walking Navapuram as the mayor: townspeople, the newspaper kiosk, the case file of clues](docs/screenshots/00_town3d.jpg)
 
 ---
 
@@ -17,7 +19,7 @@ CS3006 Introduction to Data Science, Part B (learning game). **Report:** [`repor
 | Criterion | Where to find it |
 |---|---|
 | **Concept coverage & correctness** (1.5) | Four clearly stated concepts (confounding, reverse causation, Simpson's paradox, randomised experiments), each with its own level, a definition on the reveal screen and a [causal diagram](docs/design.md). [Learning objectives](#learning-objectives) are on the start screen and below. |
-| **Game design & learning loop** (1.5) | Clear goal, budget and score per level. Loop: explore → decide → simulate → true impact → reveal. Your decision changes the simulated outcome. Each level unlocks a tool, and Level 5 tests transfer with new stories under budget pressure. It is not a quiz; the optional quiz only *measures* learning. |
+| **Game design & learning loop** (1.5) | Clear goal, budget and score per level. Loop: explore → decide → simulate → true impact → reveal. Your decision changes the simulated outcome, which you watch play out in a walkable 3D town, and the town's approval of you (and election night at the end) follows your *true* results, not the headlines. A case file nudges good investigating habits without giving answers. Each level unlocks a tool, and Level 5 tests transfer with new stories under budget pressure. It is not a quiz; the optional quiz only *measures* learning. |
 | **Implementation** (1) | A hidden structural causal model generates fresh data every game. Every chart and number is computed live, true impact uses common random numbers, and every game is replayable from its seed. Plain HTML/JS: [runs by double-click](#how-to-run). **44 automated tests** ([`tests/sim.test.js`](tests/sim.test.js)). |
 | **Documentation & evidence of learning** (1) | This README (how to play, objectives, how it works), [design notes](docs/design.md), built-in pre/post quiz, decision logging, feedback form, and a [summary script](tools/summarize_logs.py) for the [playtest results](#playtest-results). |
 
@@ -50,6 +52,14 @@ After playing, a learner should be able to:
 4. **Fund one policy** at the policy desk. From Level 4 you can first run a **randomised pilot**: a coin decides which 10 wards get the policy for 4 weeks, and you see the effect with a 95% confidence interval.
 5. **Watch the season.** The town is simulated twice, with and without your policy, using the same weather and luck. The gap is your **true impact**. You get a score, stars and badges for good detective habits.
 6. **See the reveal**: the hidden causal diagram animates in, the trap is explained in plain words, and a table shows what the data suggested for every option vs what actually happened.
+
+**In the 3D town.** Walk with W A S D or the arrow keys (Shift to run), or click the ground or the minimap.
+Press **E** (or click the orange button) to go into a place: the **Town Hall** (Dr. Asha and the policy desk),
+the **Data Office** (all the data tools), the **newspaper kiosk** and any **ward** (its numbers over last year).
+Press **J** for your **case file**: the clues worth checking for this problem, ticked off as you find them.
+Clues help you decide; they never tell you the answer. The weather, sickness (fewer people on the streets),
+crews and pilots all show in the town itself. The town's **approval** rises and falls with your true impact;
+on election night after the final term, 50% or more re-elects you.
 
 **Scoring** (per problem, out of 100): 70 × your true impact ÷ the best possible impact, plus 30 × the share of budget left, minus 20 × the share wasted on a policy that didn't help.
 
@@ -92,9 +102,10 @@ Over 200 test worlds the estimate is unbiased and the interval contains the true
 ## How to run
 
 - **Double-click `index.html`.** It runs offline in any modern browser, with no install, build step or internet.
-  (It uses plain `<script>` files, not ES modules, because browsers block modules on `file://`.)
+  (It uses plain `<script>` files, not ES modules, because browsers block modules on `file://`. The 3D library,
+  Three.js r159, is bundled in `vendor/` under its MIT licence.) `classic.html` is the 2D version of the same game.
 - Or serve the folder: `python -m http.server 8000` and open <http://localhost:8000>.
-- Online: <https://rohancarthik-max.github.io/mayor-game/> (GitHub Pages, served straight from this repo).
+- Online: <https://rohancarthik-max.github.io/cs3006-project/part-b-mayor-game/> (GitHub Pages, served straight from this repo).
 
 ## How to run the tests
 
@@ -131,9 +142,11 @@ comments) and `docs/playtest/playtest_chart.png`.
 ## Project structure
 
 ```
-index.html            the game (open this)
+index.html            the game in 3D (open this)
+classic.html          the same game in 2D
 css/style.css         layout, components, animations
 css/theme.css         the "Navapuram at dusk" look: night sky, signboard headings, treasury coins
+css/game3d.css        the 3D game's HUD, minimap, case file and pop-ups
 js/rng.js             seeded random numbers, Poisson from a given uniform
 js/stats.js           mean, sd, Pearson r, Welch CI, event study
 js/scm/common.js      rejection sampling, common-random-numbers evaluation, scoring, pilots
@@ -144,6 +157,10 @@ js/scm/l4_roads.js    hidden-confounder model (Level 4, and Level 5c theme)
 js/levels.js          stories, tools, diagrams and explanations per level
 js/charts.js js/town.js js/fx.js   SVG charts, the living town, effects
 js/ui.js js/quiz.js js/log.js      screens, quiz questions, playtest logging
+js/world3d.js         the 3D town: buildings, walking, collisions, townspeople and traffic
+js/game3d.js          3D game flow: objectives, case file, approval, election night
+js/sfx.js             small synthesised sound effects (no audio files)
+vendor/three.min.js   Three.js r159 (MIT licence in vendor/THREE_LICENSE.txt)
 tests/sim.test.js     simulation tests (node --test)
 tools/summarize_logs.py            combine players' logs into a summary + chart
 tools/validation_stats.js          recompute the report's validation numbers
