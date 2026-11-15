@@ -248,7 +248,8 @@
       var r = mesh(new T.ConeGeometry(Math.max(w, d) * 0.72, 3, 4), roof, null, true); r.rotation.y = Math.PI / 4; r.scale.set(1, 1, d / w); r.position.y = h + 1.5; gg.add(r);
       gg.add(at(box(2.2, 2.6, 0.2, '#5a3a24', null, false), 0, 1.3, d / 2 + 0.1));
       for (var k = -1; k <= 1; k += 2) gg.add(at(box(1.2, 1.0, 0.1, '#ffcf5a', { emissive: '#ffb83a', emissiveIntensity: 0.6 }, false), k * w / 3.2, h * 0.62, d / 2 + 0.06));
-      civic.add(gg); solidFrom(gg);
+      civic.add(gg);
+      solidBox(x - w / 2, x + w / 2, z - d / 2, z + d / 2 + 0.25, h + 3); // walls and door; the roof's eaves are above head height
       var s = label(name, color || '#ffc94a'); s.position.set(0, h + 4.6, 0); s.scale.set(9, 1.7, 1); gg.add(s);
       return gg;
     }
@@ -396,6 +397,9 @@
       for (var k = 0; k < lifeBoxes.length; k++) { var b = lifeBoxes[k]; if (b.o !== self && ov(b, x0, x1, z0, z1)) return false; }
       return true;
     }
+    function nearMayor(x, z) { return Math.abs(x - mayor.position.x) < 2.2 && Math.abs(z - mayor.position.z) < 2.2; }
+    // trucks drive in from outside the town when a crew policy starts (they never pop up on top of anyone)
+    function showTruck(t, k, on) { if (on && !t.visible) { t.userData.x = -58 - k * 14; t.userData.v = t.userData.speed; } t.visible = on; }
     function turnRound(wk) { wk.dir = -wk.dir; wk.toff = sideFor(wk); wk.wait = 0; }
     function updateLife(dt, t) {
       buildBoxes();
@@ -408,8 +412,8 @@
           else { wk.wait = 0; wk.off += Math.max(-step, Math.min(step, wk.toff - wk.off)); }
         } else {
           dx = wk.horiz ? wk.dir : 0; dz = wk.horiz ? 0 : wk.dir;
-          if (staticHit(x + dx * (step + 0.05), z + dz * (step + 0.05), WR)) turnRound(wk);
-          else if (bumps(wk, x - WR, x + WR, z - WR, z + WR, dx * 0.6, dz * 0.6, true)) { wk.wait += dt; if (wk.wait > 2.5) turnRound(wk); }
+          if (staticHit(x + dx * (step + 0.05), z + dz * (step + 0.05), WR) || (!wk.horiz && wk.pos + wk.dir * step < -33.5)) turnRound(wk);
+          else if (bumps(wk, x - WR, x + WR, z - WR, z + WR, dx * 0.6, dz * 0.6, true)) { wk.wait += dt; if (wk.wait > (nearMayor(x, z) ? 0.5 : 2.5)) turnRound(wk); }
           else { wk.wait = 0; wk.pos += wk.dir * step; }
         }
         rot = Math.atan2(dx, dz);
@@ -518,7 +522,7 @@
       } else rainLevel = 0;
     }
     function setPolicy(kind, mask) {
-      trucks.forEach(function (t) { t.visible = kind === 'trucks'; });
+      trucks.forEach(function (t, k) { showTruck(t, k, kind === 'trucks'); });
       wards.forEach(function (w, i) {
         var on = (kind === 'ban' || kind === 'closed') && (!mask || mask[i]);
         var want = on ? (kind === 'ban' ? '🚫 BANNED' : '✖ CLOSED') : '';
@@ -788,12 +792,28 @@
       wardName: function (k) { return NAMES[k]; },
       _blocked: blocked, _pos: function () { return { x: mayor.position.x, z: mayor.position.z }; },
       _life: lifeCheck,
+      // test helper: flood-fill the walkable ground from the start; how close can the mayor get to each E spot?
+      _reach: function () {
+        var S = 0.5, x0 = -52, z0 = -52, nx = Math.round(104 / S) + 1, nz = Math.round(85 / S) + 1, seen = new Uint8Array(nx * nz), q = [];
+        var sx = Math.round((0 - x0) / S), sz = Math.round((-33 - z0) / S);
+        seen[sz * nx + sx] = 1; q.push(sx, sz);
+        var best = hotspots.map(function () { return 1e9; });
+        while (q.length) {
+          var cz = q.pop(), cx = q.pop(), wx = x0 + cx * S, wz = z0 + cz * S;
+          hotspots.forEach(function (h, k) { var d = Math.hypot(h.pos.x - wx, h.pos.z - wz); if (d < best[k]) best[k] = d; });
+          [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (o) {
+            var ax = cx + o[0], az = cz + o[1]; if (ax < 0 || az < 0 || ax >= nx || az >= nz || seen[az * nx + ax]) return;
+            seen[az * nx + ax] = 1; if (!blocked(x0 + ax * S, z0 + az * S)) q.push(ax, az);
+          });
+        }
+        return hotspots.map(function (h, k) { return { id: h.id, closest: +best[k].toFixed(2), radius: h.r, ok: best[k] < h.r - 0.3 }; });
+      },
       _interact: function (id) { var h = hotspots.filter(function (hh) { return hh.id === id; })[0]; if (h && hotCb) hotCb(h); },
       _walkers: function () { return walkers.map(function (w, k) { var p = wXZ(w); return { k: k, out: k < outside, horiz: w.horiz, road: w.road, dir: w.dir, off: +w.off.toFixed(2), toff: w.toff, wait: +w.wait.toFixed(2), x: +p[0].toFixed(2), z: +p[1].toFixed(2) }; }); },
       // test helper: run town life for `sec` seconds without drawing; reports the worst moment
       _simLife: function (sec, opts) {
         opts = opts || {}; var worst = { overlaps: 0, walkersInSolid: 0 }, tt = 0, stuck = 0;
-        if (opts.trucks) trucks.forEach(function (tr) { tr.visible = true; });
+        if (opts.trucks) trucks.forEach(function (tr, k) { showTruck(tr, k, true); });
         if (opts.mayorAt) mayor.position.set(opts.mayorAt[0], 0, opts.mayorAt[1]);
         var start = walkers.map(function (w) { return wXZ(w); });
         for (var i = 0; i < sec * 30; i++) {
