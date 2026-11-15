@@ -1,0 +1,43 @@
+{
+  "frozen_before_test": true,
+  "primary": {
+    "family": "logreg",
+    "params": {
+      "C_": 0.1,
+      "class_weight": null
+    },
+    "trained_on_target_years": [
+      2021,
+      2022,
+      2023
+    ],
+    "threshold_probability": 0.26477683616930997,
+    "chosen_on": "2024 validation, recall >= 0.7"
+  },
+  "reference": {
+    "family": "pm25_score",
+    "threshold_log_pm25": 4.010238052925101,
+    "threshold_ugm3": 55.16
+  },
+  "also_reported": [
+    "persistence",
+    "never"
+  ],
+  "dropped": {
+    "boosting": "not clearly better than the baseline in any comparison (Fig 18)"
+  },
+  "validation_2024": {
+    "pm25_score": {
+      "PR-AUC": 0.6532695905838665,
+      "recall": 0.7236842105263158,
+      "precision": 0.5851063829787234,
+      "F1": 0.6470588235294118
+    },
+    "logreg": {
+      "PR-AUC": 0.7049164841962243,
+      "recall": 0.7105263157894737,
+      "precision": 0.6067415730337079,
+      "F1": 0.6545454545454545
+    }
+  }
+}

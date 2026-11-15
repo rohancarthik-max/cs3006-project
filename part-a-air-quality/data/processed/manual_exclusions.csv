@@ -1,0 +1,4 @@
+station_id,columns,start,end,reason
+5365,"['pm25', 'pm10']",2021-05-12,2021-05-24,Failing instrument just before a months-long outage: PM2.5 jumps 7 -> 214 -> 5 -> 397 between consecutive days while all three neighbours stay at 5-24 µg/m³.
+5365,['pm25'],2022-05-10,2025-03-09,Calibration drift: PM2.5 falls to 0.3-0.8x the other stations while its own PM10 stays ~1x and its PM2.5/PM10 ratio sits at 0.22 vs 0.4-0.5 elsewhere. Returns to normal after a maintenance gap 2025-02-20..03-09.
+306,['pm25'],2024-03-28,2024-09-30,Over-reading after an outage: PM2.5 jumps to 2-4x the other stations while PM10 does not; PM2.5/PM10 = 0.65 vs 0.25 elsewhere. Normal again in Oct 2024.

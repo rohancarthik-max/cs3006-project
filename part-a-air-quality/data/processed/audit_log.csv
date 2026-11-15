@@ -1,0 +1,69 @@
+rule,station,column,values_removed,reason
+out_of_range,Arumbakkam,rh,3,"outside physically plausible range [5, 100]"
+out_of_range,Kodungaiyur,rh,2,"outside physically plausible range [5, 100]"
+pm25_gt_pm10,Arumbakkam,pm25+pm10,2,"PM2.5 is part of PM10, so PM2.5 > PM10 is impossible; both readings dropped"
+pm25_gt_pm10,Kodungaiyur,pm25+pm10,2,"PM2.5 is part of PM10, so PM2.5 > PM10 is impossible; both readings dropped"
+pm25_gt_pm10,Manali,pm25+pm10,8,"PM2.5 is part of PM10, so PM2.5 > PM10 is impossible; both readings dropped"
+pm25_gt_pm10,Perungudi,pm25+pm10,2,"PM2.5 is part of PM10, so PM2.5 > PM10 is impossible; both readings dropped"
+stuck_value,Manali,pm25,3,>= 3 consecutive identical daily values
+stuck_value,Manali,pm10,2,>= 3 consecutive identical daily values
+stuck_value,Arumbakkam,no,6,>= 3 consecutive identical daily values
+stuck_value,Kodungaiyur,no,2,>= 3 consecutive identical daily values
+stuck_value,Manali,no,34,>= 3 consecutive identical daily values
+stuck_value,Arumbakkam,no2,6,>= 3 consecutive identical daily values
+stuck_value,Manali,no2,6,>= 3 consecutive identical daily values
+stuck_value,Arumbakkam,nox,4,>= 3 consecutive identical daily values
+stuck_value,Manali,nox,12,>= 3 consecutive identical daily values
+stuck_value,Perungudi,nox,2,>= 3 consecutive identical daily values
+stuck_value,Arumbakkam,nh3,25,>= 3 consecutive identical daily values
+stuck_value,Manali,nh3,3,>= 3 consecutive identical daily values
+stuck_value,Manali,so2,29,>= 3 consecutive identical daily values
+stuck_value,Kodungaiyur,co,104,>= 3 consecutive identical daily values
+stuck_value,Manali,co,16,>= 3 consecutive identical daily values
+stuck_value,Perungudi,co,53,>= 3 consecutive identical daily values
+stuck_value,Manali,ozone,19,>= 3 consecutive identical daily values
+stuck_value,Arumbakkam,rh,2,>= 3 consecutive identical daily values
+stuck_value,Perungudi,rh,390,>= 3 consecutive identical daily values
+stuck_value,Arumbakkam,ws,164,>= 3 consecutive identical daily values
+stuck_value,Kodungaiyur,ws,148,>= 3 consecutive identical daily values
+stuck_value,Manali,ws,2,>= 3 consecutive identical daily values
+stuck_value,Perungudi,ws,208,>= 3 consecutive identical daily values
+stuck_value,Arumbakkam,wd,168,>= 3 consecutive identical daily values
+stuck_value,Arumbakkam,sr,2,>= 3 consecutive identical daily values
+flatline,Manali,pm25,1,14-day coefficient of variation < 2%
+flatline,Manali,pm10,29,14-day coefficient of variation < 2%
+flatline,Arumbakkam,no,9,14-day coefficient of variation < 2%
+flatline,Kodungaiyur,no,184,14-day coefficient of variation < 2%
+flatline,Manali,no,323,14-day coefficient of variation < 2%
+flatline,Perungudi,no,16,14-day coefficient of variation < 2%
+flatline,Arumbakkam,no2,131,14-day coefficient of variation < 2%
+flatline,Kodungaiyur,no2,180,14-day coefficient of variation < 2%
+flatline,Manali,no2,516,14-day coefficient of variation < 2%
+flatline,Perungudi,no2,12,14-day coefficient of variation < 2%
+flatline,Arumbakkam,nox,130,14-day coefficient of variation < 2%
+flatline,Kodungaiyur,nox,210,14-day coefficient of variation < 2%
+flatline,Manali,nox,545,14-day coefficient of variation < 2%
+flatline,Kodungaiyur,nh3,127,14-day coefficient of variation < 2%
+flatline,Manali,nh3,928,14-day coefficient of variation < 2%
+flatline,Perungudi,nh3,17,14-day coefficient of variation < 2%
+flatline,Kodungaiyur,so2,106,14-day coefficient of variation < 2%
+flatline,Manali,so2,19,14-day coefficient of variation < 2%
+flatline,Kodungaiyur,co,106,14-day coefficient of variation < 2%
+flatline,Manali,co,11,14-day coefficient of variation < 2%
+flatline,Kodungaiyur,ozone,518,14-day coefficient of variation < 2%
+flatline,Manali,ozone,200,14-day coefficient of variation < 2%
+flatline,Perungudi,ozone,45,14-day coefficient of variation < 2%
+flatline,Arumbakkam,temp,68,14-day coefficient of variation < 2%
+flatline,Kodungaiyur,temp,81,14-day coefficient of variation < 2%
+flatline,Manali,temp,76,14-day coefficient of variation < 2%
+flatline,Perungudi,temp,91,14-day coefficient of variation < 2%
+flatline,Arumbakkam,rh,92,14-day coefficient of variation < 2%
+flatline,Kodungaiyur,rh,1988,14-day coefficient of variation < 2%
+flatline,Manali,rh,22,14-day coefficient of variation < 2%
+flatline,Perungudi,rh,165,14-day coefficient of variation < 2%
+flatline,Perungudi,ws,27,14-day coefficient of variation < 2%
+flatline,Manali,sr,64,14-day coefficient of variation < 2%
+manual_drift_exclusion,Kodungaiyur,pm25,13,Failing instrument just before a months-long outage: PM2.5 jumps 7 -> 214 -> 5 -> 397 between consecutive days while all three neighbours stay at 5-24 µg/m³.
+manual_drift_exclusion,Kodungaiyur,pm10,12,Failing instrument just before a months-long outage: PM2.5 jumps 7 -> 214 -> 5 -> 397 between consecutive days while all three neighbours stay at 5-24 µg/m³.
+manual_drift_exclusion,Kodungaiyur,pm25,973,Calibration drift: PM2.5 falls to 0.3-0.8x the other stations while its own PM10 stays ~1x and its PM2.5/PM10 ratio sits at 0.22 vs 0.4-0.5 elsewhere. Returns to normal after a maintenance gap 2025-02-20..03-09.
+manual_drift_exclusion,Manali,pm25,176,Over-reading after an outage: PM2.5 jumps to 2-4x the other stations while PM10 does not; PM2.5/PM10 = 0.65 vs 0.25 elsewhere. Normal again in Oct 2024.

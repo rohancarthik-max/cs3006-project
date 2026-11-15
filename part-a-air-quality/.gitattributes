@@ -1,0 +1,7 @@
+# Store text with LF line endings so the repo is identical on Windows, Mac and Linux.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+# Raw CPCB downloads: keep byte-for-byte as downloaded (no line-ending conversion).
+data/raw/** -text

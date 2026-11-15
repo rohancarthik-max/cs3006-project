@@ -1,0 +1,4 @@
+station,period,why_kept
+Perungudi,2021-06 .. 2021-10,"Ratio 0.5-0.6, but Perungudi reads low by a similar factor all of 2021 with no step change; plausible for the southern, coastal site. No second signal of a fault, so the data are kept."
+Manali,2023-08-29 .. 2023-09-25,"Short (12 days total), ratio just above the limit (1.67-1.71); consistent with local industrial episodes."
+Perungudi,2026-08-30 .. 2026-09-02,"4 days at ratio 0.56-0.60, at the edge of the band; too short to call drift."

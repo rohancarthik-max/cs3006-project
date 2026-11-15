@@ -1,0 +1,44 @@
+{
+  "model": "logistic regression (L2) with median imputation + standard scaling",
+  "params": {
+    "C_": 0.1,
+    "class_weight": null
+  },
+  "trained_on_target_years": [
+    2021,
+    2022,
+    2023
+  ],
+  "training_rows": 3506,
+  "training_bad_days": 215,
+  "features": [
+    "st_Manali",
+    "st_Kodungaiyur",
+    "st_Arumbakkam",
+    "st_Perungudi",
+    "log_pm25",
+    "log_pm25_change",
+    "log_pm25_roll3",
+    "log_pm25_roll7",
+    "pm25_missing",
+    "city_log_pm25",
+    "month_sin",
+    "month_cos",
+    "dewpoint",
+    "rh",
+    "log_rain",
+    "log_rain_3d",
+    "pressure",
+    "wind_u",
+    "wind_v",
+    "wind_speed",
+    "festival_tomorrow",
+    "festival_today"
+  ],
+  "threshold_probability": 0.26477683616930997,
+  "reference_rule_ugm3": 55.16,
+  "limit_ugm3": 60.0,
+  "scikit_learn": "1.9.1",
+  "model_file_sha256": "d328bc1b8387672862d32e116be5e61a7f97021bec8c5adce167dbec82d7d5fc",
+  "source_choice_file": "reports/model_choice.json"
+}
